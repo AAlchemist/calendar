@@ -8,13 +8,40 @@
 
     $year = $json_obj['year'];
     $month = $json_obj['month'];
-    
-    //get userId
-    //$user = unserialize($_SESSION['user']);
-    //$user_id = $user->getUserId();
-
-    $user_id = 1;
+    $is_selfCal = $json_obj['is_selfCal'];
+    //to get self events, this should be null. 
+    $friend_username = $json_obj['friend_username'];
     require "database.php";
+    $user_id = -1;
+    //to get self events, get userId from session
+    if($is_selfCal == 1){
+        $user = unserialize($_SESSION['user']);
+        $user_id = $user->getUserId();
+    }
+    //to get friends' events, find the friend's user id  through user name
+    else{
+        $stmt = $mysqli->prepare("SELECT user_id FROM users WHERE username = '$friend_username'");
+        if(!$stmt){
+            echo json_encode(array(
+                "success" => false
+            ));
+            exit;
+        }
+        if(!$stmt->execute()){
+            echo json_encode(array(
+                "success" => false,
+                "message" => "find id failed!"
+            ));
+            exit;
+        }
+        $stmt->bind_result($memberId);
+        while($stmt->fetch()){
+            $members_id[$i] = $memberId;
+        }
+        $stmt->close();
+        $user_id = $members_id[0];
+    }
+    
     $stmt = $mysqli->prepare("SELECT name, date, tag, is_group , group_members, event_time, created_time FROM events WHERE month = ? and event_year = ? and user_id = ?");
     if(!$stmt){
         echo json_encode(array(

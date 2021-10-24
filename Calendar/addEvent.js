@@ -53,7 +53,7 @@ function edit_event(){
         'event_time': '10:00'
     };
     
-    fetch("del_event.php", {
+    fetch("edit_event.php", {
         method: 'POST',
         body: JSON.stringify(data),
         headers: { 'content-type': 'application/json' }
