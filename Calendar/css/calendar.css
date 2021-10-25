@@ -1,0 +1,67 @@
+#main {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    width: 1000px;
+    height:600px;
+    margin: 10px auto;
+
+    border-style:inset;
+	border-width:medium;
+    border-color:cadetblue;
+
+    display: flex;
+
+    text-align: center;
+}
+
+#main .left_bar {
+    width: 250px;
+    margin-top: 10px;
+}
+
+#main .left_bar input{
+    margin-bottom: 5px;
+}
+
+.select {
+    margin: 10px 10px 10px 20px;
+}
+
+.date_view {
+    width: 100%;
+    border-spacing: 5px;
+}
+
+.date_view td {
+    height: 50px;
+    width: 100px;
+}
+
+.date_view div {
+    cursor: pointer;
+
+    height: 100%;
+    box-sizing: border-box; /* padding and border are included in the width and height */
+
+    border-width: 2px;
+    border-style: solid;
+    border-color: transparent;
+
+    display: flex;
+    justify-content: center; /* Element centered */
+    flex-direction: column; /* Arrange by collum */
+}
+
+.date_view div:hover, .date_view div.active {
+    border-color: rgb(43, 204, 233);
+}
+
+.date {
+    font-size: 18px;
+}
+.events {
+    font-size: 14px;
+}
+
+.today {
+    background-color: rgb(85, 173, 255)!important;
+}

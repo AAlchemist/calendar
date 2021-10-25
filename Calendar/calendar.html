@@ -1,12 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Calendar</title>
+    <link rel="stylesheet" href="css/calendar.css">
 </head>
 
 <body>
-    <button type = "button" id = "add_eventBtn" >Test</button>
+    <!-- <button type = "button" id = "add_eventBtn" >Test</button> -->
+    <div id="main">
+        <div class="left_bar" id="left_bar">
+            <div id="login_register">
+                <input type="text" id="username" placeholder="Username" />
+                <input type="password" id="password" placeholder="Password" /><br>
+                <button id="login_btn">Log In</button> <br><br>
+                <input type="text" id="new_username" placeholder="New Username" />
+                <input type="password" id="new_password" placeholder="New Password" /><br>
+                <button id="register_btn">Sign up</button>
+            </div>
+            <div id="events" hidden=true>
+                <strong id="greeting"></strong>
+                <button type="button" id="logout_btn">logout</button>
+            </div>
+        </div>
+        <div id="calendar">
+            <div class="navigation_bar">
+                <button type="button" id="today_btn">Today</button>
+                <!-- Select year -->
+                <select class="select select_year" id="select_year"></select>
+                <!-- Select month -->
+                <select class="select select_month" id="select_month"></select>
+            </div>
+            <table class="date_view">
+                <thead>
+                    <tr>
+                        <th>SUN</th>
+                        <th>MON</th>
+                        <th>TUE</th>
+                        <th>WED</th>
+                        <th>THU</th>
+                        <th>FRI</th>
+                        <th>SAT</th>
+                    </tr>
+                </thead>
+                <tbody id="table_body">
+                    <!-- <tr>
+                        <td>
+                            <div id="date_block">
+                                <span class="date">12</span>
+                                <span class="events">event1</span>
+                            </div>
+                        </td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
 <script src="addEvent.js"></script>
+<script src="calendar.js"></script>
 
 </html>
