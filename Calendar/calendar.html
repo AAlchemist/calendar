@@ -21,8 +21,41 @@
             </div>
             <div id="events" hidden=true>
                 <strong id="greeting"></strong>
-                <button type="button" id="logout_btn">logout</button>
+                <button type="button" id="logout_btn">logout</button><br>
+                <label class="current_date" id="current_date"></label><br>
+                <div id="eventList" hidden=true>
+                    <label class="event_list_title">New Event</label><br>
+                    <div class="new_event">
+                        <input id="event_name" class="event_name" type="text" placeholder="Add new event">
+                        <div style="height: 20px; margin-bottom: 25px;">
+                            <p style="height: 20px; margin-top: 0; ">
+                                <input type="checkbox" id="is_group" value="is_group">
+                                <label for="is_group" style="font-size: 15px;">group event</label>
+                                <select class="select_group_members" id="select_group_members" disabled=true multiple="multiple">
+                                    <option value="user1">user1</option>
+                                    <option value="user2">user2</option>
+                                    <option value="user3">user3</option>
+                                    <option value="user4">user4</option>
+                                </select>
+                            </p>
+                        </div>
+                        <div>
+                            <input type="time" value="00:00" id="event_time" class="event_time"/>
+                            <select class="select" id="event_tag">
+                                <option value="0">work</option>
+                                <option value="1">home</option>
+                                <option value="2">study</option>
+                            </select>
+                        </div>
+                        <button id="add_btn" class="add_btn" >Save</button>
+                    </div><br><br>
+                    <label class="event_list_title">Event List</label><br>
+                    <ol id="today_events">
+                    </ol>
+
+                </div>
             </div>
+            
         </div>
         <div id="calendar">
             <div class="navigation_bar">
