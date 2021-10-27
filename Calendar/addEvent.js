@@ -83,4 +83,11 @@ function fetch_events(){
 //JSON.stringify(data) gives output like this format
 //{"success":true,"names":["Lab 3","Lab 3"],"days":["30","30"],"tags":["1","1"],"is_groups":["1","1"],"group_members_str":["user1, user2, user3","user1, user2, user3"],
 //"event_times":["09:00:00","09:00:00"],"created_times":["2021-10-22 21:28:19","2021-10-22 22:42:37"]}
-document.getElementById("add_eventBtn").addEventListener("click", fetch_events, false);
+function get_users(){
+    fetch("get_users.php")
+    .then(response => response.json())
+    .then(data => console.log(data.success ? JSON.stringify(data) : `user list not got ${data.message}`))
+    .catch(err => console.error("error!"));
+}
+//JOSN data format: {"success":true,"userList":["user1","user2"]}
+document.getElementById("add_eventBtn").addEventListener("click", get_users, false);
