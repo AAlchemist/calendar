@@ -1,8 +1,10 @@
 const month_list = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-let selected_year, selected_month, selected_date;
+let selected_year, selected_month, selected_date = null;
 // {day: [events]}
 let day_event_map = new Map();
 let user_list = new Array();
+let token = "";
+let current_username = "";
 
 function init() {
     const current_date = new Date();
@@ -42,6 +44,7 @@ function init() {
             document.getElementById("events").hidden = false;
             document.getElementById("login_register").hidden = true;
             document.getElementById("greeting").textContent = `Hello, ${data.username}  `;
+            current_username = data.username;
         }
     })
     .catch(err => console.error("error!"));
@@ -56,7 +59,7 @@ function init() {
             let list = data.userList;
             for (let i = 0; i < list.length; ++ i) 
                 user_list.push(list[i]);
-            console.log(user_list);
+            // console.log(user_list);
             let option_html = "";
             for (let i = 0; i < user_list.length; ++ i) {
                 option_html += 
@@ -83,7 +86,6 @@ function get_calendar() {
             let table_column = document.createElement("td");
             let date_num = document.createElement("span");
             date_num.classList.add("date");
-            // TODO fetch events.
             let event = document.createElement("span");
             event.className = "events";
             let div = document.createElement("div");
@@ -94,7 +96,7 @@ function get_calendar() {
                 date_num.textContent = current_block - first_day;
                 if (current_block - first_day == today.getDate() && today.getFullYear() == selected_year && today.getMonth() == selected_month) 
                     date_num.classList.add("today");
-                event.textContent = "test event";
+                // event.textContent = "test event";
             }
             ++ current_block;
             table_row.appendChild(table_column);
@@ -131,8 +133,9 @@ function get_events() {
             let is_groups = response.is_groups;
             let group_members_strs = response.group_members_str;
             let event_times = response.event_times;
+            let event_ids = response.event_ids;
             for (let i = 0; i < event_count; ++ i) {
-                let event = {event_name: names[i], tag: tags[i], is_group: is_groups[i], group_members: group_members_strs[i], event_time: event_times[i]};
+                let event = {event_id: event_ids[i], event_name: names[i], tag: tags[i], is_group: is_groups[i], group_members: group_members_strs[i], event_time: event_times[i]};
                 if (!day_event_map.has(days[i])) {
                     day_event_map.set(days[i], [event]);
                 }
@@ -143,6 +146,7 @@ function get_events() {
                 }
             }
 
+            if (selected_date != null) get_event_by_date();
         }
     })
     .catch(error => console.error('Error:',error));
@@ -155,15 +159,117 @@ function get_event_by_date() {
     if (day_event_map.has(selected_date)) {
         let events = day_event_map.get(selected_date);
         let event_list_html = "";
-        // console.log(events);
         for (let i = 0; i < events.length; ++ i) {
-            // console.log(events[i].event_name);
-            event_list_html += 
-            `<li>
-                <span>${events[i].event_name}<span> 
-            </li>`;
+            let li = document.createElement("li");
+            let span = document.createElement("span");
+            span.textContent = events[i].event_name;
+            let edit_button = document.createElement("button");
+            edit_button.classList.add("edit_button")
+            edit_button.textContent = "edit";
+            edit_button.addEventListener("click", function(event) {
+                edit_button.disabled = true;
+                let edit_form_html = `
+                <div class="new_event">
+                    <input id="event_name_edit" class="event_name" type="text">
+                    <div style="height: 20px; margin-bottom: 25px;">
+                        <p style="height: 20px; margin-top: 0; ">
+                            <input type="checkbox" id="is_group_edit" value="is_group">
+                        </p>
+                    </div>
+                    <div>
+                        <input type="time" value="00:00" id="event_time_update" class="event_time"/>
+                        <select class="select" id="event_tag_update">
+                            <option value="0">work</option>
+                            <option value="1">home</option>
+                            <option value="2">study</option>
+                        </select>
+                    </div>
+                    <div>
+                    <button id="edit_btn" class="add_btn" >Confirm</button>
+                    <button id="cancel_btn" class="add_btn" >Cancel</button>
+                    </div>
+                    
+                </div>
+                `;
+                let option_html = "";
+                for (let i = 0; i < user_list.length; ++ i) {
+                    option_html += 
+                    `<option>${user_list[i]}</option>`;
+                }
+                
+                let edit_div = document.createElement("div");
+                edit_div.innerHTML = edit_form_html;
+                event_list.insertBefore(edit_div, li);
+                document.getElementById("cancel_btn").addEventListener("click", function(event) {
+                    event_list.removeChild(edit_div);
+                    edit_button.disabled = false;
+                }, false);
+                document.getElementById("event_name_edit").value = events[i].event_name;
+                document.getElementById("event_time_update").value = events[i].event_time;
+                document.getElementById("event_tag_update").selectedIndex = events[i].tag;
+                document.getElementById("edit_btn").addEventListener("click", function(event) {
+                    // event_id: event_ids[i], event_name: names[i], tag: tags[i], is_group: is_groups[i], group_members: group_members_strs[i], event_time: event_times[i]};
+                    const data = {
+                        'event_id': events[i].event_id, 
+                        'tag': document.getElementById("event_tag_update").selectedIndex, 
+                        'event_year': selected_year,
+                        'name': document.getElementById("event_name_edit").value,
+                        'month': selected_month + 1,
+                        'date': selected_date,
+                        'is_group':document.getElementById("is_group").checked ? 1 : 0,
+                        'event_time': document.getElementById("event_time_update").value,
+                        'token': token
+                    };
+                    fetch("edit_event.php", {
+                        method: 'POST',
+                        body: JSON.stringify(data),
+                        headers: { 'content-type': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(data => function(event) {
+                        event_list.removeChild(edit_div);
+                        get_events();
+                    })
+                    .catch(err => console.error("error!"));
+                }, false);
+            }, false)
+            let delete_button = document.createElement("button");
+            delete_button.classList.add("delete_button");
+            delete_button.textContent = "delete";
+            delete_button.addEventListener("click", function(event) {
+                const data = {
+                    'event_id': events[i].event_id, 
+                    'token': token, 
+                };
+                fetch("del_event.php", {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: { 'content-type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => console.log(data.success ? "event deleted!" : `error: ${data.message}`))
+                .catch(err => console.error("error!"));
+                get_events();
+            }, false);
+            li.appendChild(span);
+            li.appendChild(edit_button);
+            li.appendChild(delete_button);
+            li.appendChild(document.createElement("br"));
+            // time
+            let info_div = document.createElement("div");
+            info_div.classList.add("time_div");
+            let time_div_span = document.createElement("span");
+            time_div_span.textContent = events[i].event_time;
+            info_div.appendChild(time_div_span);
+            let users_span = document.createElement("span");
+            users_span.setAttribute("style", "padding-left: 5px");
+            if (events[i].is_group == "1")
+                users_span.textContent = "Group members: " + current_username + "," + events[i].group_members;
+            else users_span.textContent = current_username;
+            info_div.appendChild(users_span);
+            li.appendChild(info_div);
+            event_list.appendChild(li);
         }
-        event_list.innerHTML = event_list_html;
     }
     
 }
@@ -249,6 +355,7 @@ function login(event) {
                     document.getElementById("events").hidden = false;
                     document.getElementById("login_register").hidden = true;
                     document.getElementById("greeting").textContent = `Hello, ${username}  `;
+                    token = data.token;
                 }
                 else alert(`[ERROR] ${data.message}`)
                 
@@ -325,7 +432,6 @@ function save_event() {
         document.getElementById("is_group").checked = false;
         document.getElementById("select_group_members").disabled = true;
         get_events();
-        get_event_by_date();
     })
     .catch(err => console.error("error!"));
 }

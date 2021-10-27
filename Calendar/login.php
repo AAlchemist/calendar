@@ -35,7 +35,8 @@
         $userQueryStmt->close();
         echo json_encode(array(
             "success" => true,
-            "message" => "Success!"
+            "message" => "Success!",
+            "token" => $_SESSION['token']
         ));
         exit;
     }

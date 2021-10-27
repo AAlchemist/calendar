@@ -1,7 +1,7 @@
 #main {
     position: absolute; left: 0; top: 0; right: 0; bottom: 0;
     width: 1000px;
-    height:650px;
+    height:700px;
     margin: 10px auto;
 
     border-style:inset;
@@ -77,7 +77,7 @@
 	font-size: 20px;
     overflow-x:auto;
     overflow-y:auto;
-    height:600px;
+    max-height:600px;
     width:300px;
 }
 .event_name {
@@ -119,4 +119,17 @@
 #calendar {
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+.edit_button {
+    margin-right: 5px;
+    background-color: aquamarine;
+}
+.delete_button {
+    background-color:darksalmon;
+}
+
+.time_div {
+    font-size:12px;
+    color: #46dd80;
 }
