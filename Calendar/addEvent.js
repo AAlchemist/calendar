@@ -64,10 +64,11 @@ function edit_event(){
 }
 
 function fetch_events(){
-    //only support to update tag, name, date and time of an event
     const data = {
         'year': 2021,
-        'month': 9
+        'month': 9,
+        'is_selfCal': 0,
+        'friend_username': 'user3'
     };
     
     fetch("get_events.php", {

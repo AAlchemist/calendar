@@ -15,11 +15,11 @@
     $day = $json_obj['date'];
     $time = $json_obj['event_time'];
     
-    // $token = $json_obj['token'];
-    // //csrf detection
-    // if(!hash_equals($_SESSION['token'], $token)) {
-    //     die("Request forgery detected");
-    // }
+    $token = $json_obj['token'];
+    //csrf detection
+    if(!hash_equals($_SESSION['token'], $token)) {
+        die("Request forgery detected");
+    }
 
     require "database.php";
     $stmt = $mysqli->prepare("UPDATE events SET name = ?, tag = ?, event_year = ?, month = ?, date = ?, event_time = ? WHERE event_id = ?");

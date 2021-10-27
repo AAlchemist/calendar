@@ -15,8 +15,7 @@
     $user_id = -1;
     //to get self events, get userId from session
     if($is_selfCal == 1){
-        $user = unserialize($_SESSION['user']);
-        $user_id = $user->getUserId();
+        $user_id = $_SESSION['userId'];
     }
     //to get friends' events, find the friend's user id  through user name
     else{
@@ -36,13 +35,13 @@
         }
         $stmt->bind_result($memberId);
         while($stmt->fetch()){
-            $members_id[$i] = $memberId;
+            $members_id[] = $memberId;
         }
         $stmt->close();
         $user_id = $members_id[0];
     }
     
-    $stmt = $mysqli->prepare("SELECT name, date, tag, is_group , group_members, event_time, created_time FROM events WHERE month = ? and event_year = ? and user_id = ?");
+    $stmt = $mysqli->prepare("SELECT name, date, tag, is_group , group_members, event_time, created_time, event_id FROM events WHERE month = ? and event_year = ? and user_id = ?");
     if(!$stmt){
         echo json_encode(array(
             "success" => false,
@@ -58,10 +57,11 @@
     $group_members_str = array();
     $event_times = array();
     $created_times = array();
+    $event_ids = array();
 
     $stmt->bind_param('iis', $month, $year, $user_id);
     $stmt->execute();
-    $stmt->bind_result($name, $day, $tag, $is_group, $group_members, $event_time, $created_time);
+    $stmt->bind_result($name, $day, $tag, $is_group, $group_members, $event_time, $created_time, $event_id);
     
     while($stmt-> fetch()){
         $days[] = htmlentities($day);
@@ -71,12 +71,14 @@
         $group_members_str[] = htmlentities($group_members);
         $event_times[] = htmlentities($event_time);
         $created_times[] = htmlentities($created_time);
+        $event_ids[] = htmlentities($event_id);
     }
     $stmt->close();
 
     if(count($days) < 1){
         echo json_encode(array(
-            "success" => false
+            "success" => false,
+            "message" => 'no events found'
         ));
         exit;
     }else{
@@ -88,7 +90,8 @@
             "is_groups" => $is_groups,
             "group_members_str" => $group_members_str,
             "event_times" => $event_times,
-            "created_times" => $created_times
+            "created_times" => $created_times,
+            "event_ids" => $event_ids
         ));
         exit;
     }
