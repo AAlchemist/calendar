@@ -6,8 +6,7 @@
     $json_str = file_get_contents('php://input');
     $json_obj = json_decode($json_str, true);
 
-    $sharer = unserialize($_SESSION['user']);
-    $sharer_id = $sharer->getUserId();
+    $sharer_id = $_SESSION['userId'];
 
     $shared_username = $json_obj['shared_username'];
     $shared_userId = -1;
@@ -28,7 +27,7 @@
     }
     $stmt->bind_result($memberId);
     while($stmt->fetch()){
-        $members_id[$i] = $memberId;
+        $members_id[] = $memberId;
     }
     $stmt->close();
     $shared_userId = $members_id[0];

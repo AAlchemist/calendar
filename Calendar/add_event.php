@@ -1,4 +1,5 @@
 <?php
+    ini_set("session.cookie_httponly", 1);
     session_start();
     require 'database.php';
     header("Content-Type: application/json");
@@ -17,9 +18,7 @@
     //this is an array
     $group_members = $json_obj['group_members'];
     //get userId
-    //$user = unserialize($_SESSION['user']);
-    //$user_id = $user->getUserId();
-    $user_id = 1;
+    $user_id = $_SESSION['userId'];
 
    
     //create a group member string to insert into db
