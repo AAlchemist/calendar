@@ -3,10 +3,14 @@ let selected_year, selected_month, selected_date = null;
 // {day: [events]}
 let day_event_map = new Map();
 let user_list = new Array();
+let sharer_list = new Array();
 let token = "";
 let current_username = "";
+is_selfCal = 1;
 
 function init() {
+    is_selfCal = 1;
+    document.getElementById("add_btn").disabled = false;
     const current_date = new Date();
     const current_year = current_date.getFullYear();
     const current_month = current_date.getMonth();
@@ -45,32 +49,37 @@ function init() {
             document.getElementById("login_register").hidden = true;
             document.getElementById("greeting").textContent = `Hello, ${data.username}  `;
             current_username = data.username;
-        }
-    })
-    .catch(err => console.error("error!"));
-    // 5. Init user list (select group members).
-    fetch("get_users.php", {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            let list = data.userList;
-            for (let i = 0; i < list.length; ++ i) 
-                user_list.push(list[i]);
-            // console.log(user_list);
-            let option_html = "";
-            for (let i = 0; i < user_list.length; ++ i) {
-                option_html += 
-                `<option>${user_list[i]}</option>`;
+            token = data.token;
+            // Init user list (select group members).
+            if (current_username != "") {
+                fetch("get_users.php", {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let list = data.userList;
+                        user_list = new Array();
+                        for (let i = 0; i < list.length; ++ i) 
+                            user_list.push(list[i]);
+                        // console.log(user_list);
+                        let option_html = "";
+                        for (let i = 0; i < user_list.length; ++ i) {
+                            option_html += 
+                            `<option>${user_list[i]}</option>`;
+                        }
+                        document.getElementById("select_group_members").innerHTML = option_html;
+                        document.getElementById("share_user_select").innerHTML = option_html;
+                    }
+                    else console.log(data.message);
+                })
+                .catch(err => console.error("error!"));
+                get_sharer();
             }
-            document.getElementById("select_group_members").innerHTML = option_html;
         }
-        else console.log(data.message);
     })
     .catch(err => console.error("error!"));
-
 }
 
 function get_calendar() {
@@ -119,7 +128,7 @@ function get_events() {
     day_event_map = new Map();
     fetch("get_events.php", {
         method: "POST",
-        body: JSON.stringify({"year": selected_year, "month": selected_month + 1, "is_selfCal": 1, "friend_username": null})
+        body: JSON.stringify({"year": selected_year, "month": selected_month + 1, "is_selfCal": is_selfCal, "friend_username": document.getElementById("sharer_select").value})
     })
     .then(res => res.json())
     .then(response => {
@@ -171,11 +180,6 @@ function get_event_by_date() {
                 let edit_form_html = `
                 <div class="new_event">
                     <input id="event_name_edit" class="event_name" type="text">
-                    <div style="height: 20px; margin-bottom: 25px;">
-                        <p style="height: 20px; margin-top: 0; ">
-                            <input type="checkbox" id="is_group_edit" value="is_group">
-                        </p>
-                    </div>
                     <div>
                         <input type="time" value="00:00" id="event_time_update" class="event_time"/>
                         <select class="select" id="event_tag_update">
@@ -226,7 +230,8 @@ function get_event_by_date() {
                         headers: { 'content-type': 'application/json' }
                     })
                     .then(response => response.json())
-                    .then(data => function(event) {
+                    .then(data => {
+                        alert("Edit Successfully!");
                         event_list.removeChild(edit_div);
                         get_events();
                     })
@@ -247,9 +252,11 @@ function get_event_by_date() {
                     headers: { 'content-type': 'application/json' }
                 })
                 .then(response => response.json())
-                .then(data => console.log(data.success ? "event deleted!" : `error: ${data.message}`))
+                .then(data => {
+                    alert(data.success ? "event deleted!" : `error: ${data.message}`);
+                    get_events();
+                })
                 .catch(err => console.error("error!"));
-                get_events();
             }, false);
             li.appendChild(span);
             li.appendChild(edit_button);
@@ -269,6 +276,11 @@ function get_event_by_date() {
             info_div.appendChild(users_span);
             li.appendChild(info_div);
             event_list.appendChild(li);
+
+            if (is_selfCal == 0) {
+                edit_button.disabled = true;
+                delete_button.disabled = true;
+            }
         }
     }
     
@@ -310,6 +322,8 @@ function go_today() {
     let month = document.getElementById("select_month");
     month.options[current_month].selected = true;
     selected_month = current_month;
+    selected_date = current_date.getDate();
+    
     update_calander_view();
 }
 
@@ -335,6 +349,8 @@ function go_today() {
 // }
 
 function login(event) {
+    is_selfCal = 1;
+    document.getElementById.disabled = false;
     const username = document.getElementById("username").value; // Get the username from the form
     const password = document.getElementById("password").value; // Get the password from the form
     
@@ -356,6 +372,32 @@ function login(event) {
                     document.getElementById("login_register").hidden = true;
                     document.getElementById("greeting").textContent = `Hello, ${username}  `;
                     token = data.token;
+                    get_events();
+                    // Init user list (select group members).
+                    fetch("get_users.php", {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            let list = data.userList;
+                            user_list = new Array();
+                            for (let i = 0; i < list.length; ++ i) 
+                                user_list.push(list[i]);
+                            // console.log(user_list);
+                            let option_html = "";
+                            for (let i = 0; i < user_list.length; ++ i) {
+                                option_html += 
+                                `<option>${user_list[i]}</option>`;
+                            }
+                            document.getElementById("select_group_members").innerHTML = option_html;
+                            document.getElementById("share_user_select").innerHTML = option_html;
+                        }
+                        else console.log(data.message);
+                    })
+                    .catch(err => console.error("error!"));
+                    get_sharer();
                 }
                 else alert(`[ERROR] ${data.message}`)
                 
@@ -386,6 +428,10 @@ function logout() {
     .then(function(event) {
         document.getElementById("login_register").hidden = false;
         document.getElementById("events").hidden = true;
+        current_username = "";
+        sharer_list = new Array();
+        user_list = new Array();
+        // document.getElementById("today_events").innerHTML = "";
     })
     .catch(err => console.error("error!"));
 }
@@ -436,6 +482,58 @@ function save_event() {
     .catch(err => console.error("error!"));
 }
 
+function share_calendar() {
+    const data = {
+        'shared_username': document.getElementById("share_user_select").value, 
+        'token': token
+    };
+    fetch("share_calendar.php", {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'content-type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => alert(data.success ? "Success!" : `Error: ${data.message}`))
+    .catch(err => console.error("error!"));
+}
+
+function get_sharer() {
+    const data = {
+        'token': token
+    };
+    fetch("get_sharer.php", {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'content-type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let list = data.sharer_list;
+            sharer_list = new Array();
+            for (let i = 0; i < list.length; ++ i) 
+                sharer_list.push(list[i]);
+            // console.log(user_list);
+            let option_html = "";
+            for (let i = 0; i < sharer_list.length; ++ i) {
+                option_html += 
+                `<option>${sharer_list[i]}</option>`;
+            }
+            document.getElementById("sharer_select").innerHTML = option_html;
+        }
+        else console.log(data.message);
+    })
+    .catch(err => console.error("error!"));
+}
+
+function view_other() {
+    is_selfCal = 0;
+    current_username = document.getElementById("sharer_select").value;
+    document.getElementById("greeting").textContent = `Hello, ${current_username}  `;
+    document.getElementById("add_btn").disabled = true;
+    get_events();
+}
+
 document.addEventListener("DOMContentLoaded", init, false);
 document.getElementById("login_btn").addEventListener("click", login, false); // Bind the AJAX call to button click
 document.getElementById("register_btn").addEventListener("click", register, false);
@@ -445,3 +543,6 @@ document.getElementById("today_btn").addEventListener("click", go_today, false);
 document.getElementById("logout_btn").addEventListener("click", logout, false);
 document.getElementById("is_group").addEventListener("change", set_group, false);
 document.getElementById("add_btn").addEventListener("click", save_event, false);
+document.getElementById("share_btn").addEventListener("click", share_calendar, false);
+document.getElementById("return_btn").addEventListener("click", init, false);
+document.getElementById("view_btn").addEventListener("click", view_other, false);

@@ -56,7 +56,7 @@
         </div>
         <div id="calendar">
             <div class="navigation_bar">
-                <button type="button" id="today_btn">Today</button>
+                <button type="button" id="today_btn">Current Month</button>
                 <!-- Select year -->
                 <select class="select select_year" id="select_year"></select>
                 <!-- Select month -->
@@ -85,6 +85,20 @@
                     </tr> -->
                 </tbody>
             </table>
+            <div style="display: flex;">
+                <div>
+                    <label>Share Calendar with</label><br>
+                    <select id="share_user_select"></select>
+                    <button type="button" id="share_btn">Share</button>
+                </div>
+                <div style="padding-left: 20px;">
+                    <label>View Shared Calendar</label><br>
+                    <select id="sharer_select"></select>
+                    <button type="button" id="view_btn">View</button>
+                    <button type="button" id="return_btn">Return to My Calendar</button>
+                </div>
+            </div>
+            
         </div>
     </div>
 </body>

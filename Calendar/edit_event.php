@@ -5,6 +5,10 @@
     $json_str = file_get_contents('php://input');
     //This will store the data into an associative array
     $json_obj = json_decode($json_str, true);
+    $token = $json_obj['token'];
+    if(!hash_equals($_SESSION['token'], $token)) {
+        die("Request forgery detected");
+    }
 
     //only support update tag, name, date and time of an event
     $event_id = $json_obj['event_id'];

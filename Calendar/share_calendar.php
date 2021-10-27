@@ -9,6 +9,10 @@
     $sharer_id = $_SESSION['userId'];
 
     $shared_username = $json_obj['shared_username'];
+    $token = $json_obj['token'];
+    if(!hash_equals($_SESSION['token'], $token)) {
+        die("Request forgery detected");
+    }
     $shared_userId = -1;
 
     $stmt = $mysqli->prepare("SELECT user_id FROM users WHERE username = '$shared_username'");
@@ -48,5 +52,8 @@
         ));
         exit;
     }
+    echo json_encode(array(
+        "success" => true
+    ));
     $stmt->close();
 ?>
