@@ -2,6 +2,7 @@ const month_list = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 let selected_year, selected_month, selected_date;
 // {day: [events]}
 let day_event_map = new Map();
+let user_list = new Array();
 
 function init() {
     const current_date = new Date();
@@ -31,6 +32,41 @@ function init() {
     // 3. Init calendar
     get_calendar();
     // 4. Check the login status and init the left_bar.
+    fetch("get_login_user.php", {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("events").hidden = false;
+            document.getElementById("login_register").hidden = true;
+            document.getElementById("greeting").textContent = `Hello, ${data.username}  `;
+        }
+    })
+    .catch(err => console.error("error!"));
+    // 5. Init user list (select group members).
+    fetch("get_users.php", {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let list = data.userList;
+            for (let i = 0; i < list.length; ++ i) 
+                user_list.push(list[i]);
+            console.log(user_list);
+            let option_html = "";
+            for (let i = 0; i < user_list.length; ++ i) {
+                option_html += 
+                `<option>${user_list[i]}</option>`;
+            }
+            document.getElementById("select_group_members").innerHTML = option_html;
+        }
+        else console.log(data.message);
+    })
+    .catch(err => console.error("error!"));
 
 }
 
@@ -78,13 +114,14 @@ const events  = {
 }
 
 function get_events() {
+    day_event_map = new Map();
     fetch("get_events.php", {
         method: "POST",
         body: JSON.stringify({"year": selected_year, "month": selected_month + 1, "is_selfCal": 1, "friend_username": null})
     })
     .then(res => res.json())
     .then(response => {
-        console.log(response);
+        // console.log(response);
         if (!response.success) console.log(`get events error ! ${response.message}`);
         else {
             let event_count = response.days.length;
@@ -109,10 +146,10 @@ function get_events() {
         }
     })
     .catch(error => console.error('Error:',error));
-    console.log(day_event_map);
 }
 
 function get_event_by_date() {
+    // console.log(selected_date);
     let event_list = document.getElementById("today_events");
     event_list.innerHTML = ""; // Empty event list.
     if (day_event_map.has(selected_date)) {
@@ -120,7 +157,7 @@ function get_event_by_date() {
         let event_list_html = "";
         // console.log(events);
         for (let i = 0; i < events.length; ++ i) {
-            console.log(events[i].event_name);
+            // console.log(events[i].event_name);
             event_list_html += 
             `<li>
                 <span>${events[i].event_name}<span> 
@@ -207,7 +244,7 @@ function login(event) {
         .then(
             data => {
                 if (data.success) {
-                    alert("Welcome! " + username);
+                    // alert("Welcome! " + username);
                     // load_event_page(username);
                     document.getElementById("events").hidden = false;
                     document.getElementById("login_register").hidden = true;
@@ -242,7 +279,6 @@ function logout() {
     .then(function(event) {
         document.getElementById("login_register").hidden = false;
         document.getElementById("events").hidden = true;
-
     })
     .catch(err => console.error("error!"));
 }
@@ -258,7 +294,7 @@ function save_event() {
     let name = document.getElementById("event_name").value;
     let tag = document.getElementById("event_tag").selectedIndex;
     let event_year = selected_year;
-    let month = selected_month;
+    let month = selected_month + 1; // starts from 0
     let date = selected_date;
     let event_time = document.getElementById("event_time").value;
     let is_group = document.getElementById("is_group").checked ? 1 : 0;
@@ -288,6 +324,8 @@ function save_event() {
         document.getElementById("event_name").value = "";
         document.getElementById("is_group").checked = false;
         document.getElementById("select_group_members").disabled = true;
+        get_events();
+        get_event_by_date();
     })
     .catch(err => console.error("error!"));
 }
