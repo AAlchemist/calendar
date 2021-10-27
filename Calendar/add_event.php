@@ -24,9 +24,10 @@
     //create a group member string to insert into db
     //add the current user first
     //$groupMem_str = $user->getUserName();
-    $groupMem_str = "user1";
+    $groupMem_str = "";
     for($i = 0; $i < count($group_members); $i++){
-        $groupMem_str = $groupMem_str . ", " . $group_members[$i];
+        if ($groupMem_str != "") $groupMem_str = $groupMem_str . ",";
+        $groupMem_str = $groupMem_str . $group_members[$i];
     }
     
     $stmt = $mysqli->prepare("INSERT into events (name, tag, event_year, month, date, is_group, group_members, user_id, event_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
